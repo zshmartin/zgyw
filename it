@@ -1,0 +1,796 @@
+[1mdiff --git a/src/components/energyConfig/EnergyConfig.vue b/src/components/energyConfig/EnergyConfig.vue[m
+[1mindex c0c40d8..8f457d6 100644[m
+[1m--- a/src/components/energyConfig/EnergyConfig.vue[m
+[1m+++ b/src/components/energyConfig/EnergyConfig.vue[m
+[36m@@ -137,14 +137,15 @@[m
+               @change="variableChange"[m
+             >[m
+               <el-option[m
+[31m-                v-for="item in variableOptions"[m
+[31m-                :key="item.code"[m
+[32m+[m[32m                v-for="(item,index) in variableOptions"[m
+[32m+[m[32m                :key="index"[m
+                 :label="item.code"[m
+                 :value="item.code"[m
+               ></el-option>[m
+             </el-select>[m
+           </el-form-item>[m
+         </div>[m
+[32m+[m[32m        <div style="padding-left: 100px; color: red;" v-show="properties && (editEnergyForm.statistics == 1 && properties != 3)">无数据</div>[m
+         <el-form-item label="计量级别" prop="statistics">[m
+           <el-radio v-model="editEnergyForm.statistics" label="1">对外核算</el-radio>[m
+           <el-radio v-model="editEnergyForm.statistics" label="0">其他</el-radio>[m
+[36m@@ -204,7 +205,8 @@[m [mexport default {[m
+       energyOptions: [], //所有能源类型[m
+       classifyOptions: [], //所有分组[m
+       equipOptions: [], //分组下的设备[m
+[31m-      variableOptions: [] //设备下的变量[m
+[32m+[m[32m      variableOptions: [], //设备下的变量[m
+[32m+[m[32m      properties: '',     //选中变量的属性[m
+     };[m
+   },[m
+   watch: {[m
+[36m@@ -390,15 +392,26 @@[m [mexport default {[m
+     // 变量改变[m
+     variableChange() {[m
+       this.$forceUpdate();[m
+[32m+[m[32m      if(!this.editEnergyForm.code) {[m
+[32m+[m[32m        return[m[41m [m
+[32m+[m[32m      }[m
+[32m+[m[32m      var code = this.editEnergyForm.code[m
+[32m+[m[32m      var index = this.variableOptions.findIndex( item => {[m
+[32m+[m[32m        return item.code === code[m
+[32m+[m[32m      })[m
+[32m+[m[32m      console.log(this.variableOptions[index])[m
+[32m+[m[32m      this.properties = this.variableOptions[index].properties[m
+     },[m
+     // 新增编辑提交[m
+     editEnergySubmit() {[m
+       this.$refs.editEnergyRef.validate(valid => {[m
+         if (valid) {[m
+[32m+[m[32m          var per1 = (this.properties && (this.properties != 3 && this.editEnergyForm.statistics == 1))[m
+           // 新增[m
+           if (!this.editEnergyForm.id) {[m
+             var obj = JSON.parse(JSON.stringify(this.editEnergyForm));[m
+             // this.$delete(obj, "classifyId");[m
+[32m+[m[32m            obj.properties = per1 ? 0 : obj.properties[m
+             obj.siteId = this.$store.state.site.siteId;[m
+             this.$http.post("equipment/energyBranch/add", obj).then(res => {[m
+               if (res.data.code === 0) {[m
+[36m@@ -422,6 +435,7 @@[m [mexport default {[m
+               }[m
+             });[m
+           } else {[m
+[32m+[m[32m            this.editEnergyForm.properties = per1 ? 0 : this.editEnergyForm.properties[m
+             this.$http[m
+               .post("equipment/energyBranch/update", this.editEnergyForm)[m
+               .then(res => {[m
+[36m@@ -462,6 +476,7 @@[m [mexport default {[m
+       };[m
+       this.$refs.editEnergyRef.resetFields();[m
+       this.$delete(this.editEnergyForm, "id");[m
+[32m+[m[32m      this.properties = null[m
+     },[m
+     // 获取所有的能源分支[m
+     getEnergyBranch() {[m
+[36m@@ -482,19 +497,6 @@[m [mexport default {[m
+           }[m
+         });[m
+     },[m
+[31m-    // 获取支路详情[m
+[31m-    branchDetail() {[m
+[31m-      this.$http[m
+[31m-        .get("equipment/energyBranch/detail", {[m
+[31m-          params: {[m
+[31m-            id: 1[m
+[31m-          }[m
+[31m-        })[m
+[31m-        .then(res => {[m
+[31m-          if (res.data.code === 0) {[m
+[31m-          }[m
+[31m-        });[m
+[31m-    },[m
+     // 获取站点的所有能源类型[m
+     getEnergyOptions_inSite() {[m
+       this.$http[m
+[1mdiff --git a/src/components/energyConsume/EnergyConsume.vue b/src/components/energyConsume/EnergyConsume.vue[m
+[1mindex 81ed45d..8a88cc8 100644[m
+[1m--- a/src/components/energyConsume/EnergyConsume.vue[m
+[1m+++ b/src/components/energyConsume/EnergyConsume.vue[m
+[36m@@ -9,7 +9,7 @@[m
+     <div class="consume-right">[m
+       <div class="line radiu-margin">[m
+         用能曲线图[m
+[31m-        <poly_line></poly_line>[m
+[32m+[m[32m        <poly_line :lineObj="lineObj"></poly_line>[m
+       </div>[m
+       <div class="report radiu-margin">[m
+         用能报表[m
+[36m@@ -27,9 +27,9 @@[m [mexport default {[m
+     poly_line,[m
+     table_report,[m
+   },[m
+[31m-  props: [],[m
+   data() {[m
+     return {[m
+[32m+[m[32m      lineObj: {},[m
+       tableData: [[m
+         {[m
+           date: "2016-05-02",[m
+[36m@@ -56,7 +56,15 @@[m [mexport default {[m
+   },[m
+   computed: {},[m
+   watch: {},[m
+[31m-  methods: {}[m
+[32m+[m[32m  mounted() {[m
+[32m+[m[32m    this.lineObj = {[m
+[32m+[m[32m      arr: [1,34,7],[m
+[32m+[m[32m      arrX: [1,2,3,4][m
+[32m+[m[32m    }[m
+[32m+[m[32m  },[m
+[32m+[m[32m  methods: {[m
+[32m+[m[41m   [m
+[32m+[m[32m  },[m
+ };[m
+ </script>[m
+ [m
+[1mdiff --git a/src/components/energyReport/EnergyReport.vue b/src/components/energyReport/EnergyReport.vue[m
+[1mindex 953f73f..6170bb4 100644[m
+[1m--- a/src/components/energyReport/EnergyReport.vue[m
+[1m+++ b/src/components/energyReport/EnergyReport.vue[m
+[36m@@ -1,102 +1,324 @@[m
+ <template>[m
+[31m-  <!-- 能源报表 -->[m
+[31m-  <div class="energy-report">[m
+[31m-    <div class="report-left">[m
+[31m-      <div class="left-title">[m
+[31m-        <span style="color: white; padding-left: 4px;">过滤条件</span>[m
+[31m-      </div>[m
+[32m+[m[32m  <div class="energy-config">[m
+[32m+[m[32m    <!-- 左边筛选栏 -->[m
+[32m+[m[32m    <div class="select">[m
+       <div class="filter">[m
+[31m-        <el-form ref="filterRef" :model="filterForm" class="filterForm" label-width="80px" size="mini">[m
+[31m-          <el-form-item label="筛选">[m
+[31m-            <el-select v-model="filterForm.region" placeholder="请选择活动区域">[m
+[31m-              <el-option label="区域一" value="shanghai"></el-option>[m
+[31m-              <el-option label="区域二" value="beijing"></el-option>[m
+[31m-            </el-select>[m
+[31m-          </el-form-item>[m
+[31m-          <el-form-item label="报表类型">[m
+[31m-            <div class="radio">[m
+[31m-              <el-radio-group v-model="filterForm.timeType" size="small">[m
+[31m-                <el-radio-button label="day">日报</el-radio-button>[m
+[31m-                <el-radio-button label="month">月报</el-radio-button>[m
+[31m-                <el-radio-button label="year">年报</el-radio-button>[m
+[31m-              </el-radio-group>[m
+[32m+[m[32m        <div style="height: 20px;"></div>[m
+[32m+[m[32m        <div class="label" style>[m
+[32m+[m[32m          <span>类别：</span>[m
+[32m+[m[32m          <el-radio-group v-model="energyType" size="mini">[m
+[32m+[m[32m            <el-radio-button[m
+[32m+[m[32m              v-for="(item,index) in energyTypeOptions"[m
+[32m+[m[32m              :key="index"[m
+[32m+[m[32m              :label="item.id"[m
+[32m+[m[32m            >{{item.properties}}</el-radio-button>[m
+[32m+[m[32m            <!-- <el-radio-button label="road">支路</el-radio-button> -->[m
+[32m+[m[32m          </el-radio-group>[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m        <div class="label" style="margin-top: 8px;">[m
+[32m+[m[32m          <span>标签：</span>[m
+[32m+[m[32m          <el-radio-group[m
+[32m+[m[32m            v-model="type"[m
+[32m+[m[32m            size="mini"[m
+[32m+[m[32m            @change="typeChange"[m
+[32m+[m[32m            style="display: inline-block;"[m
+[32m+[m[32m          >[m
+[32m+[m[32m            <el-radio-button label="department">部门</el-radio-button>[m
+[32m+[m[32m            <el-radio-button label="branch">支路</el-radio-button>[m
+[32m+[m[32m          </el-radio-group>[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m        <div style="margin-top: 8px;">[m
+[32m+[m[32m          <span>类型：</span>[m
+[32m+[m[32m          <!-- 单选框 -->[m
+[32m+[m[32m          <el-radio-group v-model="timeSelect" size="large">[m
+[32m+[m[32m            <el-radio-button label="day">日报</el-radio-button>[m
+[32m+[m[32m            <el-radio-button label="month">月报</el-radio-button>[m
+[32m+[m[32m            <el-radio-button label="year">年报</el-radio-button>[m
+[32m+[m[32m          </el-radio-group>[m
+[32m+[m[32m        </div>[m
+[32m+[m
+[32m+[m[32m        <!-- 月 -->[m
+[32m+[m[32m        <!-- <div class="date" v-if="timeSelect=='day'"> -->[m
+[32m+[m[32m        <div style="margin-top: 8px;">[m
+[32m+[m[32m          <span>日期：</span>[m
+[32m+[m[32m          <!-- 日期选择器  -->[m
+[32m+[m[32m          <div style="display: inline-block;">[m
+[32m+[m[32m            <div class="date" v-if="timeSelect=='day'">[m
+[32m+[m[32m              <el-date-picker[m
+[32m+[m[32m                v-model="hourSelect"[m
+[32m+[m[32m                align="right"[m
+[32m+[m[32m                type="date"[m
+[32m+[m[32m                placeholder="选择日期"[m
+[32m+[m[32m                :picker-options="pickerOptions"[m
+[32m+[m[32m                :clearable="Boolean(false)"[m
+[32m+[m[32m                size="mini"[m
+[32m+[m[32m              ></el-date-picker>[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m            <div class="date" v-if="timeSelect=='month'">[m
+[32m+[m[32m              <el-date-picker[m
+[32m+[m[32m                v-model="daySelect"[m
+[32m+[m[32m                type="month"[m
+[32m+[m[32m                placeholder="选择月"[m
+[32m+[m[32m                format="yyyy-MM"[m
+[32m+[m[32m                size="mini"[m
+[32m+[m[32m                :clearable="Boolean(false)"[m
+[32m+[m[32m              ></el-date-picker>[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m            <!-- 年 -->[m
+[32m+[m[32m            <!-- <div class="date" v-if="timeSelect=='month'"> -->[m
+[32m+[m[32m            <div class="date" v-if="timeSelect=='year'">[m
+[32m+[m[32m              <el-date-picker[m
+[32m+[m[32m                v-model="monthSelect"[m
+[32m+[m[32m                align="right"[m
+[32m+[m[32m                size="mini"[m
+[32m+[m[32m                type="year"[m
+[32m+[m[32m                placeholder="选择年"[m
+[32m+[m[32m                :clearable="Boolean(false)"[m
+[32m+[m[32m              ></el-date-picker>[m
+             </div>[m
+[31m-          </el-form-item>[m
+[31m-        </el-form>[m
+[32m+[m[32m          </div>[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m      </div>[m
+[32m+[m[32m      <div class="select-list">[m
+[32m+[m[32m        <el-checkbox-group v-model="checkList">[m
+[32m+[m[32m          <div v-for="(item,index) in selectArr" :key="index">[m
+[32m+[m[32m            <el-checkbox :label="item"></el-checkbox>[m
+[32m+[m[32m          </div>[m
+[32m+[m[32m        </el-checkbox-group>[m
+[32m+[m[32m        <!-- <el-checkbox v-model="checked">备选项2</el-checkbox>[m
+[32m+[m[32m        <el-checkbox v-model="checked">备选项3</el-checkbox>-->[m
+[32m+[m[32m        <!-- <div[m
+[32m+[m[32m          v-for="(item,index) in selectArr"[m
+[32m+[m[32m          :key="index"[m
+[32m+[m[32m          :class="{hover: index === mouseHover, 'selected': index === mouseClick}"[m
+[32m+[m[32m          @click="selectClick(index)"[m
+[32m+[m[32m          @mouseleave="selectLeave"[m
+[32m+[m[32m          @mouseover="selectOn(index)"[m
+[32m+[m[32m        >[m
+[32m+[m[32m          <span style="padding-left: 6px;"></span>[m
+[32m+[m[32m          <i class="el-icon-location"></i>[m
+[32m+[m[32m          <span>{{item}}</span>[m
+[32m+[m[32m        </div>-->[m
+       </div>[m
+[31m-[m
+[31m-      <div class="select"></div>[m
+     </div>[m
+[31m-    <div class="report-right">[m
+[31m-      <div class="title">[m
+[31m-        <span>能耗报表</span>[m
+[32m+[m[32m    <!-- 右边展示栏 -->[m
+[32m+[m[32m    <div class="list">[m
+[32m+[m[32m      <div class="list-show">[m
+[32m+[m[32m        <el-table :data="tableData" border style="width: 100%">[m
+[32m+[m[32m          <el-table-column prop="date" label="日期" width="180"></el-table-column>[m
+[32m+[m[32m          <el-table-column prop="name" label="姓名" width="180"></el-table-column>[m
+[32m+[m[32m          <el-table-column prop="address" label="地址"></el-table-column>[m
+[32m+[m[32m        </el-table>[m
+       </div>[m
+     </div>[m
+   </div>[m
+ </template>[m
+ [m
+ <script>[m
+[32m+[m[32m// import {formatEnergyData} from '../../utils/index'[m
+ export default {[m
+[31m-  props: [],[m
+   data() {[m
+     return {[m
+[31m-      filterForm: {[m
+[31m-        timeType: "day"[m
+[31m-      }[m
+[32m+[m[32m      pickerOptions: {[m
+[32m+[m[32m        disabledDate(time) {[m
+[32m+[m[32m          // console.log(time)[m
+[32m+[m[32m          console.log(time.getTime);[m
+[32m+[m[32m          return ([m
+[32m+[m[32m            time.getTime() > Date.now() || time.getTime() < new Date(2019, 9, 1)[m
+[32m+[m[32m          );[m
+[32m+[m[32m        }[m
+[32m+[m[32m      },[m
+[32m+[m[32m      hourSelect: new Date(),[m
+[32m+[m[32m      daySelect: new Date(),[m
+[32m+[m[32m      monthSelect: new Date(),[m
+[32m+[m[32m      type: "department",[m
+[32m+[m[32m      selectArr: [],[m
+[32m+[m[32m      energyType: "",[m
+[32m+[m[32m      energyTypeOptions: [], //站点下存在的能源类型[m
+[32m+[m[32m      timeSelect: "day", //报表类型[m
+[32m+[m[32m      checkList: [],[m
+[32m+[m[32m      tableData: [{[m
+[32m+[m[32m          date: '2016-05-02',[m
+[32m+[m[32m          name: '王小虎',[m
+[32m+[m[32m          address: '上海市普陀区金沙江路 1518 弄'[m
+[32m+[m[32m        }, {[m
+[32m+[m[32m          date: '2016-05-04',[m
+[32m+[m[32m          name: '王小虎',[m
+[32m+[m[32m          address: '上海市普陀区金沙江路 1517 弄'[m
+[32m+[m[32m        }, {[m
+[32m+[m[32m          date: '2016-05-01',[m
+[32m+[m[32m          name: '王小虎',[m
+[32m+[m[32m          address: '上海市普陀区金沙江路 1519 弄'[m
+[32m+[m[32m        }, {[m
+[32m+[m[32m          date: '2016-05-03',[m
+[32m+[m[32m          name: '王小虎',[m
+[32m+[m[32m          address: '上海市普陀区金沙江路 1516 弄'[m
+[32m+[m[32m        }][m
+     };[m
+   },[m
+[31m-  computed: {},[m
+[31m-  watch: {},[m
+[31m-  methods: {}[m
+[32m+[m[32m  watch: {[m
+[32m+[m[32m    energyType: {[m
+[32m+[m[32m      handler(newValue) {[m
+[32m+[m[32m        // 类别发生变化，刷新数据[m
+[32m+[m[32m        console.log(newValue);[m
+[32m+[m[32m        this.getSelectList();[m
+[32m+[m[32m      }[m
+[32m+[m[32m    },[m
+[32m+[m[32m    type: {[m
+[32m+[m[32m      handler(newValue) {[m
+[32m+[m[32m        this.getSelectList();[m
+[32m+[m[32m      }[m
+[32m+[m[32m    }[m
+[32m+[m[32m  },[m
+[32m+[m[32m  mounted() {[m
+[32m+[m[32m    this.getEnergyOptions_inSite();[m
+[32m+[m[32m  },[m
+[32m+[m[32m  methods: {[m
+[32m+[m[32m    typeChange() {},[m
+[32m+[m[32m    // 获取站点的所有能源类型[m
+[32m+[m[32m    getEnergyOptions_inSite() {[m
+[32m+[m[32m      this.$http[m
+[32m+[m[32m        .get("equipment/energyBranch/getAllType", {[m
+[32m+[m[32m          params: {[m
+[32m+[m[32m            siteId: this.$store.state.site.siteId[m
+[32m+[m[32m          }[m
+[32m+[m[32m        })[m
+[32m+[m[32m        .then(res => {[m
+[32m+[m[32m          if (res.data.code === 0) {[m
+[32m+[m[32m            this.energyTypeOptions = res.data.data;[m
+[32m+[m[32m            if (this.energyTypeOptions.length > 0) {[m
+[32m+[m[32m              this.energyType = this.energyTypeOptions[0].id;[m
+[32m+[m[32m            }[m
+[32m+[m[32m          }[m
+[32m+[m[32m        });[m
+[32m+[m[32m    },[m
+[32m+[m[32m    // 获取日月年统计支路能耗趋势[m
+[32m+[m[32m    getBranchTotal() {[m
+[32m+[m[32m      this.$http[m
+[32m+[m[32m        .get("equipment/energyBranch/branchDataByDate", {[m
+[32m+[m[32m          params: {[m
+[32m+[m[32m            branch: "",[m
+[32m+[m[32m            type: "day",[m
+[32m+[m[32m            tb: "day_20191223"[m
+[32m+[m[32m          }[m
+[32m+[m[32m        })[m
+[32m+[m[32m        .then(res => {[m
+[32m+[m[32m          if (res.data.code == 0) {[m
+[32m+[m[32m          }[m
+[32m+[m[32m        });[m
+[32m+[m[32m    },[m
+[32m+[m[32m    // 获取站点下的所有能源部门或能源分支[m
+[32m+[m[32m    getSelectList() {[m
+[32m+[m[32m      if (!this.energyType) {[m
+[32m+[m[32m        return;[m
+[32m+[m[32m      }[m
+[32m+[m[32m      if (this.type === "department") {[m
+[32m+[m[32m        this.$http[m
+[32m+[m[32m          .get("equipment/energyBranch/getAllDepartment", {[m
+[32m+[m[32m            params: {[m
+[32m+[m[32m              siteId: this.$store.state.site.siteId,[m
+[32m+[m[32m              energyType: this.energyType[m
+[32m+[m[32m            }[m
+[32m+[m[32m          })[m
+[32m+[m[32m          .then(res => {[m
+[32m+[m[32m            if (res.data.code === 0) {[m
+[32m+[m[32m              this.selectArr = res.data.data;[m
+[32m+[m[32m            }[m
+[32m+[m[32m          });[m
+[32m+[m[32m      } else {[m
+[32m+[m[32m        this.$http[m
+[32m+[m[32m          .get("equipment/energyBranch/getAllBranch", {[m
+[32m+[m[32m            params: {[m
+[32m+[m[32m              siteId: this.$store.state.site.siteId,[m
+[32m+[m[32m              energyType: this.energyType[m
+[32m+[m[32m            }[m
+[32m+[m[32m          })[m
+[32m+[m[32m          .then(res => {[m
+[32m+[m[32m            if (res.data.code === 0) {[m
+[32m+[m[32m              this.selectArr = res.data.data;[m
+[32m+[m[32m            }[m
+[32m+[m[32m          });[m
+[32m+[m[32m      }[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }[m
+ };[m
+ </script>[m
+ [m
+ <style scoped>[m
+[31m-.energy-report {[m
+[32m+[m[32m.energy-config {[m
+[32m+[m[32m  width: 100%;[m
+   height: 100%;[m
+[31m-  min-height: 400px;[m
+[31m-  /* background-color: aliceblue; */[m
+   display: -webkit-flex;[m
+[31m-  width: 100%;[m
+[32m+[m[32m  background-color: f6f6f6;[m
+ }[m
+ [m
+[31m-.report-left {[m
+[31m-  background-color: azure;[m
+[32m+[m[32m/* 左边样式 */[m
+[32m+[m[32m.select {[m
+[32m+[m[32m  width: 300px;[m
+   height: 100%;[m
+[32m+[m[32m  overflow: hidden;[m
+[32m+[m[32m  /* background-color: pink; */[m
+   margin-right: 6px;[m
+[31m-  border-radius: 6px;[m
+[31m-  width: 240px;[m
+[32m+[m[32m  border: 1px solid #ccc;[m
+[32m+[m[32m  padding: 6px;[m
+[32m+[m[32m  box-sizing: border-box;[m
+[32m+[m[32m  background-color: #fff;[m
+ }[m
+ [m
+[31m-.left-title {[m
+[31m-  height: 30px;[m
+[31m-  background-color: dodgerblue;[m
+[31m-  display: -webkit-flex;[m
+[31m-  align-items: center;[m
+[32m+[m[32m.select .filter {[m
+[32m+[m[32m  height: 200px;[m
+[32m+[m[32m  border-bottom: 1px solid #ccc;[m
+[32m+[m[32m  /* background-color: antiquewhite; */[m
+[32m+[m[32m  /* padding-left: 6px; */[m
+[32m+[m[32m  /* display: -webkit-flex;[m
+[32m+[m[32m  flex-direction: cloumn;[m
+[32m+[m[32m justify-content: center; */[m
+ }[m
+ [m
+[31m-.filterForm {[m
+[31m-  padding: 6px;[m
+[31m-  /* background-color: aliceblue; */[m
+[32m+[m[32m.filter >>> .el-radio-button__inner {[m
+[32m+[m[32m  padding: 5px 8px;[m
+ }[m
+ [m
+[31m-.radio >>> .el-radio-button__inner {[m
+[31m-  padding: 6px 12px;[m
+[32m+[m[32m.filter >>> .el-date-editor--date {[m
+[32m+[m[32m  width: 138px;[m
+ }[m
+ [m
+[31m-.report-right {[m
+[31m-  flex: 1;[m
+[31m-  background-color: azure;[m
+[31m-  height: 100%;[m
+[31m-  border-radius: 6px;[m
+[32m+[m[32m.select .select-list {[m
+[32m+[m[32m  height: calc(100% - 200px);[m
+[32m+[m[32m  /* background-color: #6fa4bb; */[m
+[32m+[m[32m  padding-top: 6px;[m
+[32m+[m[32m  overflow: auto;[m
+[32m+[m[32m  /* padding: 6px; */[m
+[32m+[m[32m  /* box-sizing: border-box; */[m
+ }[m
+ [m
+[31m-.report-right .title {[m
+[31m-  background-color: dodgerblue;[m
+[31m-  padding-left: 10px;[m
+[31m-  height: 30px;[m
+[31m-  display: -webkit-flex;[m
+[31m-  align-items: center;[m
+[31m-  color: white;[m
+[32m+[m[32m.select .select-list div {[m
+[32m+[m[32m  cursor: pointer;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m/* 鼠标移入颜色 */[m
+[32m+[m[32m.select-list .selected {[m
+[32m+[m[32m  background-color: bisque;[m
+[32m+[m[32m}[m
+[32m+[m[32m.select-list .hover {[m
+[32m+[m[32m  background-color: #e4f0dc;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m.filter .label {[m
+[32m+[m[32m  /* display: -webkit-flex;[m
+[32m+[m[32m  align-items: center; */[m
+[32m+[m[32m  /* margin-top: 20px; */[m
+[32m+[m[32m  /* height: 100%; */[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m/* 右边区域样式 */[m
+[32m+[m[32m.list {[m
+[32m+[m[32m  flex: 1;[m
+[32m+[m[32m  height: 100%;[m
+[32m+[m[32m  background-color: #fff;[m
+[32m+[m[32m  border: 1px solid #ccc;[m
+[32m+[m[32m  padding: 4px;[m
+[32m+[m[32m  box-sizing: border-box;[m
+[32m+[m[32m  overflow: hidden;[m
+ }[m
+ </style>[m
+\ No newline at end of file[m
+[1mdiff --git a/src/components/energyStatistics/EnergyStatistics.vue b/src/components/energyStatistics/EnergyStatistics.vue[m
+[1mindex 58e8fdf..d8344ad 100644[m
+[1m--- a/src/components/energyStatistics/EnergyStatistics.vue[m
+[1m+++ b/src/components/energyStatistics/EnergyStatistics.vue[m
+[36m@@ -30,11 +30,15 @@[m [mexport default {[m
+   },[m
+   props: [],[m
+   data() {[m
+[31m-    return {};[m
+[32m+[m[32m    return {[m
+[32m+[m[32m      energyType: '',[m
+[32m+[m[32m    };[m
+   },[m
+   computed: {},[m
+   watch: {},[m
+[31m-  methods: {}[m
+[32m+[m[32m  methods: {[m
+[32m+[m[41m    [m
+[32m+[m[32m  }[m
+ };[m
+ </script>[m
+ [m
+[1mdiff --git a/src/components/subcomponents/polyline.vue b/src/components/subcomponents/polyline.vue[m
+[1mindex 674f752..5007898 100644[m
+[1m--- a/src/components/subcomponents/polyline.vue[m
+[1m+++ b/src/components/subcomponents/polyline.vue[m
+[36m@@ -7,6 +7,7 @@[m
+ <script type="text/babel">[m
+ import echarts from "echarts";[m
+ export default {[m
+[32m+[m[32m  props: ['lineObj'],[m
+   data() {[m
+     return {[m
+       classPrefix: "polyline",[m
+[36m@@ -14,49 +15,66 @@[m [mexport default {[m
+         "张三组",[m
+         "李四组",[m
+         "王五组",[m
+[31m-        "刘四组",[m
+[31m-        "张三组",[m
+[31m-        "李四组",[m
+[31m-        "王电饭锅五组",[m
+[31m-        "刘四组",[m
+[31m-        "王五2组",[m
+[31m-        "刘四2组"[m
+[32m+[m[32m        // "刘四组",[m
+[32m+[m[32m        // "张三组",[m
+[32m+[m[32m        // "李四组",[m
+[32m+[m[32m        // "王电饭锅五组",[m
+[32m+[m[32m        // "刘四组",[m
+[32m+[m[32m        // "王五2组",[m
+[32m+[m[32m        // "刘四2组"[m
+       ],[m
+[31m-      yNum: ["阶段1评审", "阶段2评审", "阶段3评审", "阶段4评审", "阶段5评审"],[m
+[32m+[m[32m      // yNum: ["阶段1评审", "阶段2评审", "阶段3评审", "阶段4评审", "阶段5评审"],[m
+[32m+[m[32m      // series: [[m
+[32m+[m[32m      //   {[m
+[32m+[m[32m      //     name: "阶段1评审",[m
+[32m+[m[32m      //     type: "line",[m
+[32m+[m[32m      //     stack: "评审1",[m
+[32m+[m[32m      //     data: [20, 32, 1, 34, 20, 30, 10, 21, 34, 2][m
+[32m+[m[32m      //   },[m
+[32m+[m[32m      //   {[m
+[32m+[m[32m      //     name: "阶段2评审",[m
+[32m+[m[32m      //     type: "line",[m
+[32m+[m[32m      //     stack: "评审2",[m
+[32m+[m[32m      //     data: [22, 52, 31, 34, 39, 30, 10, 42, 23, 1][m
+[32m+[m[32m      //   },[m
+[32m+[m[32m      //   {[m
+[32m+[m[32m      //     name: "阶段3评审",[m
+[32m+[m[32m      //     type: "line",[m
+[32m+[m[32m      //     stack: "评审3",[m
+[32m+[m[32m      //     data: [10, 22, 1, 54, 50, 30, 10, 12, 21, 42][m
+[32m+[m[32m      //   },[m
+[32m+[m[32m      //   {[m
+[32m+[m[32m      //     name: "阶段4评审",[m
+[32m+[m[32m      //     type: "line",[m
+[32m+[m[32m      //     stack: "评审4",[m
+[32m+[m[32m      //     data: [34, 32, 13, 34, 70, 30, 20, 12, 12, 4][m
+[32m+[m[32m      //   },[m
+[32m+[m[32m      //   {[m
+[32m+[m[32m      //     name: "阶段5评审",[m
+[32m+[m[32m      //     type: "line",[m
+[32m+[m[32m      //     stack: "评审5",[m
+[32m+[m[32m      //     data: [30, 12, 1, 34, 20, 30, 10, 56, 12, 12][m
+[32m+[m[32m      //   }[m
+[32m+[m[32m      // ] // 折线图数据[m
+       series: [[m
+[31m-        {[m
+[31m-          name: "阶段1评审",[m
+[31m-          type: "line",[m
+[31m-          stack: "评审1",[m
+[31m-          data: [20, 32, 1, 34, 20, 30, 10, 21, 34, 2][m
+[31m-        },[m
+[31m-        {[m
+[31m-          name: "阶段2评审",[m
+[31m-          type: "line",[m
+[31m-          stack: "评审2",[m
+[31m-          data: [22, 52, 31, 34, 39, 30, 10, 42, 23, 1][m
+[31m-        },[m
+[31m-        {[m
+[31m-          name: "阶段3评审",[m
+[31m-          type: "line",[m
+[31m-          stack: "评审3",[m
+[31m-          data: [10, 22, 1, 54, 50, 30, 10, 12, 21, 42][m
+[31m-        },[m
+[31m-        {[m
+[31m-          name: "阶段4评审",[m
+[31m-          type: "line",[m
+[31m-          stack: "评审4",[m
+[31m-          data: [34, 32, 13, 34, 70, 30, 20, 12, 12, 4][m
+[31m-        },[m
+[31m-        {[m
+[31m-          name: "阶段5评审",[m
+[31m-          type: "line",[m
+[31m-          stack: "评审5",[m
+[31m-          data: [30, 12, 1, 34, 20, 30, 10, 56, 12, 12][m
+[31m-        }[m
+[31m-      ] // 折线图数据[m
+[32m+[m[41m        [m
+[32m+[m[32m      ][m
+     };[m
+   },[m
+[32m+[m[32m  watch: {[m
+[32m+[m[32m    lineObj(newValue) {[m
+[32m+[m[32m      // alert(1)[m
+[32m+[m[32m      // this.xNum = newValue.arrX,[m
+[32m+[m[32m      // // this.yNum = newValue.arr[m
+[32m+[m[32m      // this.series = [[m
+[32m+[m[32m      //   {[m
+[32m+[m[32m      //     type: 'line',[m
+[32m+[m[32m      //     data: newValue.arr[m
+[32m+[m[32m      //   }[m
+[32m+[m[32m      // ][m
+[32m+[m[32m      this.initChart()[m
+[32m+[m[32m    }[m
+[32m+[m[32m  },[m
+   methods: {[m
+     // 图表初始化数据[m
+     initChart() {[m
+[36m@@ -82,7 +100,8 @@[m [mexport default {[m
+         xAxis: {[m
+           type: "category",[m
+           boundaryGap: false,[m
+[31m-          data: this.xNum,[m
+[32m+[m[32m          // data: this.xNum,[m
+[32m+[m[32m          data: this.lineObj.arrX,[m
+           axisLabel: {[m
+             interval: 0,[m
+             rotate: -60[m
+[36m@@ -90,14 +109,21 @@[m [mexport default {[m
+         },[m
+         yAxis: {[m
+           type: "value",[m
+[31m-          min: 0,[m
+[31m-          max: 100,[m
+[31m-          interval: 20,[m
+[31m-          axisLabel: {[m
+[31m-            formatter: "{value} %"[m
+[31m-          }[m
+[32m+[m[32m          // min: 0,[m
+[32m+[m[32m          // max: 100,[m
+[32m+[m[32m          // interval: 20,[m
+[32m+[m[32m          // axisLabel: {[m
+[32m+[m[32m          //   formatter: "{value} %"[m
+[32m+[m[32m          // }[m
+         },[m
+[31m-        series: this.series[m
+[32m+[m[32m        // series: this.series[m
+[32m+[m[32m        series: [[m
+[32m+[m[32m          {[m
+[32m+[m[32m            type: 'line',[m
+[32m+[m[32m            data: this.lineObj.arr,[m
+[32m+[m[32m            // yAxisIndex: '',[m
+[32m+[m[32m          }[m
+[32m+[m[32m        ][m
+       });[m
+     }[m
+   },[m
+[1mdiff --git a/src/utils/index.js b/src/utils/index.js[m
+[1mindex 701d24c..b7a5027 100644[m
+[1m--- a/src/utils/index.js[m
+[1m+++ b/src/utils/index.js[m
+[36m@@ -837,11 +837,77 @@[m [mexport function isEmptyObject(obj) {[m
+ /**[m
+  * 随机生成十六进制颜色[m
+  */[m
+[31m-export function color16(){//十六进制颜色随机[m
+[31m-  var r = Math.floor(Math.random()*256);[m
+[31m-  var g = Math.floor(Math.random()*256);[m
+[31m-  var b = Math.floor(Math.random()*256);[m
+[31m-  var color = '#'+r.toString(16)+g.toString(16)+b.toString(16);[m
+[32m+[m[32mexport function color16() { //十六进制颜色随机[m
+[32m+[m[32m  var r = Math.floor(Math.random() * 256);[m
+[32m+[m[32m  var g = Math.floor(Math.random() * 256);[m
+[32m+[m[32m  var b = Math.floor(Math.random() * 256);[m
+[32m+[m[32m  var color = '#' + r.toString(16) + g.toString(16) + b.toString(16);[m
+   console.log(color)[m
+   return color;[m
+ }[m
+[32m+[m
+[32m+[m[32m/**[m
+[32m+[m[32m * 总能耗数据格式化[m
+[32m+[m[32m * 最终数据格式[m
+[32m+[m[32m * data: {[m
+[32m+[m[32m * arrX: [1,2,3],[m
+[32m+[m[32m * arrY: [2,3,4],[m
+[32m+[m[32m * trans: 2,[m
+[32m+[m[32m * }[m
+[32m+[m[32m *[m[41m [m
+[32m+[m[32m */[m
+[32m+[m[32m// export function formatEnergyData(time, type, data) {[m
+[32m+[m[32m//   var arrX = [][m
+[32m+[m[32m//   var trans[m
+[32m+[m[32m//   if (type == 'day') {[m
+[32m+[m[32m//     trans = 30[m
+[32m+[m[32m//     for (var i = 0; i < 288; i++) {[m
+[32m+[m[32m//       let hour = parseInt(i / 12)[m
+[32m+[m[32m//       let min = i % 12 * 5[m
+[32m+[m[32m//       hour = hour < 10 ? ('0' + hour) : hour.toString()[m
+[32m+[m[32m//       min = min < 10 ? ('0' + min) : min.toString()[m
+[32m+[m[32m//       arrX.push(hour + ':' + min)[m
+[32m+[m[32m//     }[m
+[32m+[m[32m//   } else if (type == 'month') {[m
+[32m+[m[32m//     trans = 3[m
+[32m+[m[32m//     let year = time.getFullYear()[m
+[32m+[m[32m//     let month = time.getMonth()[m
+[32m+[m[32m//     let days = new Date(year, month + 1, 0).getDate()[m
+[32m+[m[32m//     for (var i = 1; i <= days; i++) {[m
+[32m+[m[32m//       arrX.push(i)[m
+[32m+[m[32m//     }[m
+[32m+[m[32m//   } else if (type == 'year') {[m
+[32m+[m[32m//     trans = 1[m
+[32m+[m[32m//     for (var i = 1; i <= 12; i++) {[m
+[32m+[m[32m//       arrX.push(i)[m
+[32m+[m[32m//     }[m
+[32m+[m[32m//   }[m
+[32m+[m[32m//   var obj = {[m
+[32m+[m[32m//     arrX: arrX,[m
+[32m+[m[32m//     trans: trans,[m
+[32m+[m[32m//     arr: [][m
+[32m+[m[32m//   }[m
+[32m+[m[32m//   console.log(obj)[m
+[32m+[m[32m//   // for (var i = 0; i < data.arr.length; i++) {[m
+[32m+[m
+[32m+[m[32m//   for (var i = 0; i < obj.arrX.length; i++) {[m
+[32m+[m[32m//     var ifHave = false[m
+[32m+[m[32m//     for (var j = 0; j < data.arr.length; j++) {[m
+[32m+[m[32m//       for (var k in data.arr[j]) {[m
+[32m+[m[32m//         // console.log(k, data.arr[j][k])[m
+[32m+[m[32m//         if(data.arr[j][k] === obj.arrX[i]) {[m
+[32m+[m[32m//           obj.arr.push(k)[m
+[32m+[m[32m//           ifHave = true[m
+[32m+[m[32m//           data.arr.splice(j,1)[m
+[32m+[m[32m//           j--[m
+[32m+[m[32m//         }[m
+[32m+[m[32m//       }[m
+[32m+[m[32m//     }[m
+[32m+[m[32m//     if(!ifHave) {[m
+[32m+[m[32m//       obj.arr.push(null)[m
+[32m+[m[32m//     }[m
+[32m+[m
+[32m+[m[32m//   }[m
+[32m+[m[32m//   console.log(obj)[m
+[32m+[m[32m//   return obj[m
+[32m+[m[32m// }[m

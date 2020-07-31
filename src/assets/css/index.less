@@ -1,0 +1,909 @@
+@font-color: #fff; //页面主要文字颜色
+@font-select-color: rgba(245, 166, 35); //文字选中颜色3
+@hight-light: #3F5363; //边栏选中项高亮背景颜色
+@beside-color: #384C5C; //主界面边栏背景颜色
+@board-bgc: #4E657A; //看板背景主色
+@board-title: #54657D; //看板标题背景色
+@primary-btn: rgba(245, 166, 35); //黄色背景主按钮
+@del-btn: rgba(230, 67, 64); //红色背景按钮
+// @radio-bgc: rgba(245, 166, 35);     //单选框背景色
+@radio-bgc: rgba(64, 158, 255); //单选框背景色
+@table-border: #aaa; //页面表格边框颜色
+@table-bgc: rgba(67, 92, 112); //表格背景色
+@content-bgc: rgba(67, 92, 112); //内容背景色
+@table-stripe: rgb(78, 101, 122); //表格隔行色
+@table-th-bgc: #44627e; //表头颜色
+@back-color: rgba(40, 57, 70); //弹窗后的背景色
+@table-hover: #607d8b; //鼠标移入表格背景色
+@box-block: rgb(78, 101, 122); //块级背景色
+@a-color: rgb(211, 212, 104);   //a相颜色
+@b-color: rgb(78, 212, 183);   //b相颜色
+@c-color: rgb(247, 96, 77);   //c相颜色
+@d-color: rgb(64, 158, 255);   //合相颜色
+
+
+// 告警级别颜色
+@one-level: red;
+@two-level: orangered;
+@three-level: orange;
+@four-level: #d1d15a;
+@five-level: #4b7708;
+@six-level: #9dde3a;
+
+.warn-btn {
+  padding: 4px 13px;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.one-type {
+  background-color: @one-level;
+}
+
+.two-type {
+  background-color: @two-level;
+}
+
+.three-type {
+  background-color: @three-level;
+}
+
+.four-type {
+  background-color: @four-level;
+}
+
+.five-type {
+  background-color: @five-level;
+}
+
+.six-type {
+  background-color: @six-level;
+}
+
+// ---------------------------------flex布局兼容及代码块
+@dis-flex: {
+  display: -webkit-flex;
+  /* 新版本语法: Chrome 21+ */
+  display: flex;
+  /* 新版本语法: Opera 12.1, Firefox 22+ */
+  display: -webkit-box;
+  /* 老版本语法: Safari, iOS, Android browser, older WebKit browsers. */
+  display: -moz-box;
+  /* 老版本语法: Firefox (buggy) */
+  display: -ms-flexbox;
+  /* 混合版本语法: IE 10 */
+}
+
+// flex: 1 兼容
+@flex-1: {
+  -webkit-flex: 1;
+  /* Chrome */
+  -ms-flex: 1;
+  /* IE 10 */
+  flex: 1;
+  /* NEW, Spec - Opera 12.1, Firefox 20+ */
+  -webkit-box-flex: 1;
+  /* OLD - iOS 6-, Safari 3.1-6 */
+  -moz-box-flex: 1;
+  /* OLD - Firefox 19- */
+}
+
+/* 父元素-主轴内容居中（主轴是横向才生效） */
+@flex-pc: {
+  /* 09版 */
+  -webkit-box-pack: center;
+  /* 12版 */
+  -webkit-justify-content: center;
+  -moz-justify-content: center;
+  -ms-justify-content: center;
+  -o-justify-content: center;
+  justify-content: center;
+  /* 其它取值如下：
+  align-items 主轴原点方向对齐
+  flex-end 主轴延伸方向对齐
+  space-between 等间距排列，首尾不留白
+  space-around 等间距排列，首尾留白
+  */
+}
+
+/* 父元素-副轴内容居中（主轴是横向才生效） */
+@flex-sc: {
+  /* 09版 */
+  -webkit-box-align: center;
+  /* 12版 */
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  -o-align-items: center;
+  align-items: center;
+}
+
+/* 父元素-横向排列（主轴） */
+@flex-r: {
+  display: box;
+  /* OLD - Android 4.4- */
+  display: -webkit-box;
+  /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box;
+  /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox;
+  /* TWEENER - IE 10 */
+  display: -webkit-flex;
+  /* NEW - Chrome */
+  display: flex;
+  /* NEW, Spec - Opera 12.1, Firefox 20+ */
+  /* 09版 */
+  -webkit-box-orient: horizontal;
+  /* 12版 */
+  -webkit-flex-direction: row;
+  -moz-flex-direction: row;
+  -ms-flex-direction: row;
+  -o-flex-direction: row;
+  flex-direction: row;
+}
+
+/* 父元素-横向换行 */
+@flex-rw: {
+  /* 09版 */
+  /*-webkit-box-lines: multiple;*/
+  /* 12版 */
+  -webkit-flex-wrap: wrap;
+  -moz-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  -o-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+/* 父元素-纵向排列（主轴） */
+@flex-c: {
+  display: box;
+  /* OLD - Android 4.4- */
+  display: -webkit-box;
+  /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box;
+  /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox;
+  /* TWEENER - IE 10 */
+  display: -webkit-flex;
+  /* NEW - Chrome */
+  display: flex;
+  /* NEW, Spec - Opera 12.1, Firefox 20+ */
+  /* 09版 */
+  -webkit-box-orient: vertical;
+  /* 12版 */
+  -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  -o-flex-direction: column;
+  flex-direction: column;
+}
+
+/* 父元素-纵向换行 */
+@flex-cw: {
+  /* 09版 */
+  /*-webkit-box-lines: multiple;*/
+  /* 12版 */
+  -webkit-flex-wrap: wrap;
+  -moz-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  -o-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+
+/* 子元素-显示在从左向右（从上向下）第1个位置，用于改变源文档顺序显示 */
+.flex-1 {
+  -webkit-box-ordinal-group: 1;
+  /* OLD - iOS 6-, Safari 3.1-6 */
+  -moz-box-ordinal-group: 1;
+  /* OLD - Firefox 19- */
+  -ms-flex-order: 1;
+  /* TWEENER - IE 10 */
+  -webkit-order: 1;
+  /* NEW - Chrome */
+  order: 1;
+  /* NEW, Spec - Opera 12.1, Firefox 20+ */
+}
+
+
+/* 子元素-显示在从左向右（从上向下）第2个位置，用于改变源文档顺序显示 */
+.flex-2 {
+  -webkit-box-ordinal-group: 2;
+  /* OLD - iOS 6-, Safari 3.1-6 */
+  -moz-box-ordinal-group: 2;
+  /* OLD - Firefox 19- */
+  -ms-flex-order: 2;
+  /* TWEENER - IE 10 */
+  -webkit-order: 2;
+  /* NEW - Chrome */
+  order: 2;
+  /* NEW, Spec - Opera 12.1, Firefox 20+ */
+}
+
+
+
+// --------------------------------------公共样式
+html,
+body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  overflow-y: hidden;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+
+
+#app {
+  height: 100%;
+  overflow: auto;
+  min-width: 1200px;
+  color: @font-color;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+img {
+  vertical-align: top;
+  border: none;
+}
+
+.clearf:after,
+.clearf:before {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+.bx-size {
+  box-sizing: border-box;
+}
+
+// ---------------------------------element全局样式
+/* --------------------------------全局滚动条样式 */
+::-webkit-scrollbar {
+  /*滚动条整体样式*/
+  width: 10px;
+  /*高宽分别对应横竖滚动条的尺寸*/
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  /*滚动条里面小方块*/
+  border-radius: 10px;
+  background-color: #ccc;
+  /* background-image: -webkit-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.2) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.2) 75%,
+      transparent 75%,
+      transparent
+  ); */
+}
+
+::-webkit-scrollbar-track {
+  /*滚动条里面轨道*/
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  /* background   : #435c70; */
+  border-radius: 10px;
+}
+
+.el-table--scrollable-x .el-table__body-wrapper::-webkit-scrollbar {
+  /*滚动条整体样式*/
+  width: 10px;
+  /*高宽分别对应横竖滚动条的尺寸*/
+  height: 6px;
+}
+
+.el-table--scrollable-x .el-table__body-wrapper::-webkit-scrollbar-thumb {
+  /*滚动条里面小方块*/
+  border-radius: 10px;
+  background-color: #ccc;
+  /* background-image: -webkit-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.2) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.2) 75%,
+      transparent 75%,
+      transparent
+  ); */
+}
+
+.el-table--scrollable-x .el-table__body-wrapper::-webkit-scrollbar-track {
+  /*滚动条里面轨道*/
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  /* background   : #435c70; */
+  border-radius: 10px;
+}
+
+
+//-------------------------------------- 全局清空日期选择器弹窗里面的"清空"文字
+.el-date-range-picker {
+  .el-picker-panel__footer {
+    .el-button--text {
+      display: none !important;
+    }
+  }
+}
+
+// -----------------------------------------------------分页全局样式
+#app .page {
+  background-color: rgba(67, 92, 112);
+  margin: 10px 0;
+}
+
+#app .el-pagination__total {
+  color: #fff;
+}
+
+#app .el-pagination__jump {
+  margin-right: 10px;
+  color: #fff;
+}
+
+#app .el-pager li {
+  background: none;
+}
+
+#app .el-pagination .btn-next,
+#app .el-pagination .btn-prev {
+  background: none;
+  color: #ccc;
+}
+
+#app .el-pagination .btn-next:hover,
+#app .el-pagination .btn-prev:hover {
+  background: none;
+  color: #409eff;
+}
+
+#app .el-select .el-input__inner {
+  background-color: @board-bgc;
+  color: #fff;
+  // height: 26px;
+}
+
+#app .el-pagination__editor .el-input__inner {
+  background-color: @board-bgc;
+  color: #fff;
+  height: 26px;
+}
+
+#app .el-pager li {
+  color: #ccc;
+}
+
+#app .el-pager li:hover {
+  color: #409eff;
+}
+
+#app .el-pager li.active {
+  color: #409eff;
+}
+
+// #app .el-pager .number {
+//   color: #ccc;
+// }
+// #app .el-pager .number.active {
+//   color: #409EFF;
+// }
+#app .block .el-pagination /deep/ .el-input__inner {
+  height: 26px;
+}
+
+
+
+//------------------------------------ table表格全局
+#app .el-table--border:after,
+#app .el-table--group:after,
+#app .el-table:before {
+  background-color: #888888;
+}
+
+// 带边框
+#app .el-table--border,
+#app .el-table--group {
+  border-color: #888888;
+}
+
+
+
+#app .el-table__row .cell {
+  height: 28px;
+}
+
+#app .el-table td,
+#app .el-table th.is-leaf {
+  border-bottom: 1px solid #888888;
+}
+
+#app .el-table--border th,
+#app .el-table--border th.gutter:last-of-type {
+  border-bottom: 1px solid #888888;
+}
+
+#app .el-table--border td,
+#app .el-table--border th {
+  border-right: 1px solid #888888;
+  color: #ddd;
+}
+
+#app .el-table th {
+  background-color: @table-th-bgc;
+}
+
+#app .el-table tr {
+  background-color: @table-bgc;
+}
+
+#app .el-table__empty-block {
+  background-color: @table-bgc;
+  color: #ccc;
+}
+
+// 鼠标移入
+#app .el-table--enable-row-hover .el-table__body tr:hover>td {
+  background-color: #4e657a;
+}
+
+//---------- 不带边框
+#app .el-table__row {
+  color: #ddd;
+}
+
+#app .el-table__body tr.hover-row.current-row>td,
+#app .el-table__body tr.hover-row.el-table__row--striped.current-row>td,
+#app .el-table__body tr.hover-row.el-table__row--striped>td,
+#app .el-table__body tr.hover-row>td {
+  background-color: #4e657a;
+}
+
+#app .el-table thead {
+  color: #fff;
+  // background-color: #354439;
+}
+
+//---------- 隔行变色
+#app .el-table--striped .el-table__body tr.el-table__row--striped td {
+  background: rgba(49, 74, 95);
+}
+
+#app .el-table--striped.hover-row .el-table__body tr.el-table__row--striped.hover-row td {
+  background: #4e657a !important;
+}
+
+// 固定
+#app .el-table .el-table__fixed {
+  height: 100% !important;
+}
+
+.el-table,
+.el-table__expanded-cell {
+  background: none;
+}
+
+// -----------------------------------------单选框
+#app .is-active .el-radio-button__inner {
+  background-color: @radio-bgc;
+  border-color: @radio-bgc;
+}
+
+#app .time .el-radio-button__inner {
+  border: none;
+}
+
+/*鼠标移入颜色 */
+#app .time .el-radio-button__inner:hover {
+  color: @radio-bgc;
+}
+
+/* 鼠标移入已选项保持颜色 */
+#app .time .is-active .el-radio-button__inner:hover {
+  color: #fff;
+}
+
+// ---------------------
+#app .el-radio__input.is-checked .el-radio__inner {
+  border-color: #ffab40;
+  background: #ffbb40;
+}
+
+#app .el-radio__input.is-checked+.el-radio__label {
+  color: #ffbb40;
+}
+
+#app .el-radio__inner:hover {
+  border: 1px solid #ffbb40;
+}
+
+#app .el-radio {
+  margin-right: 16px;
+}
+
+// -----------------------------------------树形控件
+/* 树形组件选中颜色 */
+#app .el-tree {
+  color: #fff;
+  background: @table-bgc;
+}
+
+// #app .el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content {
+//   background-color: hsl(214, 21%, 45%);
+// }
+#app .el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content {
+  // background-color: hsl(214, 21%, 45%);
+  background: none;
+}
+#app .el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content .custom-tree-node {
+  background-color: hsl(214, 21%, 45%);
+}
+
+// 二层树形闪白消除处理
+#app .el-tree-node:focus>.el-tree-node__content {
+  background: none;
+}
+
+#app .el-tree>.is-expanded>.el-tree-node__content {
+  background-color: @table-bgc;
+}
+
+#app .el-tree>.is-expanded>.el-tree-node__children>.is-expanded>.el-tree-node__content.is-current {
+  background-color: @table-bgc;
+}
+
+#app .el-tree-node__content .custom-tree-node {
+  padding: 0 10px;
+  border-radius: 4px;
+}
+
+/* 树形组件鼠标移入颜色 */
+#app .el-tree-node__content:hover {
+  // background-color: rgba(90, 110, 137,0.4);
+  background: none;
+}
+#app .el-tree-node__content .custom-tree-node:hover {
+  background-color: rgba(90, 110, 137,0.6);
+}
+
+// -------------------------------------------弹窗
+#app .el-dialog {
+  // background-color: @board-bgc;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  padding: 6px;
+  background-image: linear-gradient(80deg, #777777, #232323, #354439, #666665);
+}
+
+#app .el-dialog__header {
+  padding: 4px 10px 10px;
+}
+
+#app .el-dialog__title {
+  color: #ccc;
+}
+
+#app .el-dialog__header button {
+  top: 14px;
+  right: 16px;
+}
+
+#app .el-dialog .el-input__inner::-webkit-input-placeholder {
+  color: #666666;
+}
+
+#app .el-dialog .el-input__inner::-moz-input-placeholder {
+  color: #666666;
+}
+
+#app .el-dialog .el-input__inner::-ms-input-placeholder {
+  color: #666666;
+}
+
+#app .el-dialog__body {
+  padding: 16px 40px 10px 30px;
+  border: 1px solid #ccc;
+  border-bottom: none;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  background-color: @back-color;
+  color: #ccc;
+}
+
+#app .el-dialog__body .el-input__inner {
+  background-color: rgb(60, 87, 107);
+  // border: none;
+  color: #ccc;
+}
+
+#app .el-dialog__body .el-input__inner:focus {
+  // background-color: rgb(60, 87, 107);
+  // border: none;
+  // color: #ccc;
+  // border: 1px solid #409eff;
+}
+
+#app .el-dialog__body .el-form-item__label {
+  color: #ccc;
+}
+
+#app .el-input.is-disabled .el-input__inner {
+  background-color: #afa8a8;
+}
+
+#app .el-dialog__footer {
+  border: 1px solid #ccc;
+  border-top: none;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  background-color: @back-color;
+}
+
+//------按钮
+#app .el-dialog__footer .el-button.cancel {
+  background-color: green;
+  color: #fff;
+  border: none;
+  padding: 9px 15px;
+}
+
+#app .el-dialog__footer .el-button.confirm {
+  background-color: @primary-btn;
+  color: #fff;
+  border: none;
+  padding: 9px 15px;
+}
+
+#app .el-dialog__footer .el-button.dang {
+  background-color: red;
+  color: #fff;
+  border: none;
+  padding: 9px 15px;
+}
+
+#app .el-dialog__body .el-form-item {
+  margin-bottom: 22px;
+}
+
+#app .el-dialog__body .el-form-item .el-input__inner {
+
+  height: 32px;
+}
+
+// -------------------------------------------下拉框
+// 元素不在根元素之下
+.el-select-dropdown {
+  background-color: #44627e !important;
+}
+
+.el-select-dropdown__item {
+  padding: 0 20px;
+}
+
+.el-select-dropdown .el-select-dropdown__item span {
+  color: #ccc;
+}
+
+.el-select-dropdown .el-select-dropdown__item.hover {
+  background-color: #838992;
+}
+
+.el-select-dropdown .el-select-dropdown__item.selected span {
+  color: skyblue;
+}
+
+.el-select-dropdown.is-multiple .el-select-dropdown__item.selected {
+  color: #409eff;
+  background-color: #44627e !important;
+}
+
+.el-select-dropdown.is-multiple .el-select-dropdown__item.selected.hover {
+  background-color: #838992 !important;
+}
+
+// -----------------------------------placeholder全局样式
+#app .el-input__inner::-webkit-input-placeholder {
+  color: #ccc;
+}
+
+#app .el-input__inner::-moz-input-placeholder {
+  color: #ccc;
+}
+
+#app .el-input__inner::-ms-input-placeholder {
+  color: #ccc;
+}
+
+//----------------------------------------输入框
+// #app .el-input.el-input--small {
+//   background-color: #ccc;
+// }
+#app .el-input__inner {
+  background: none;
+  color: #fff;
+  height: 36px;
+  line-height: 36px;
+}
+
+//------------------------------------------时间组件
+#app .el-date-editor .el-range-separator {
+  color: #fff;
+}
+
+#app .el-date-editor .el-range-input {
+  color: #fff;
+  background: none;
+}
+
+//--------------------------------------------多选项
+#app .el-checkbox .el-checkbox__label {
+  color: #fff;
+}
+
+//----------------------------------------------标签
+
+#app .el-tabs__item {
+  color: @font-color;
+  font-size: 16px;
+}
+
+#app .el-tabs__item.is-active {
+  color: @font-select-color  !important;
+}
+
+#app .el-tabs__nav .el-tabs__active-bar {
+  background-color: @font-select-color;
+}
+
+//---------------------------------------------表单
+#app .el-form-item__label {
+  color: #ccc;
+}
+
+#app .el-tabs__content {
+  padding-bottom: 20px;
+}
+
+// --------------------------------------------计算器
+#app .el-input-number__decrease,
+#app .el-input-number__increase {
+  color: #fff;
+}
+
+// ------------------------------------------------加载中
+#app .el-loading-mask {
+  background-color: rgba(67, 92, 112, 0.5);
+  border: none;
+  color: #ccc;
+}
+
+//----------------------------------------------面包屑
+#app .el-breadcrumb {
+  font-size: 16px;
+}
+
+#app .el-breadcrumb__item:last-child .el-breadcrumb__inner,
+#app .el-breadcrumb__item:last-child .el-breadcrumb__inner:hover,
+#app .el-breadcrumb__item:last-child .el-breadcrumb__inner a,
+#app .el-breadcrumb__item:last-child .el-breadcrumb__inner a:hover {
+  font-weight: 400;
+  color: #fff;
+  cursor: text;
+}
+
+//-----------------------------------------------全局按钮
+#app .el-button {
+  padding: 9px 15px;
+}
+
+#app .el-button--small {
+  padding: 9px 15px;
+}
+
+#app .el-button--mini {
+  padding: 7px 15px;
+}
+
+#app .el-button.confirm {
+  background-color: @primary-btn;
+  color: #fff;
+  border-color: @primary-btn;
+}
+
+#app .el-button.del {
+  background-color: @del-btn;
+  color: #fff;
+  border-color: @del-btn;
+}
+
+#app .el-button--mini.mini {
+  padding: 4px 10px;
+}
+
+#app .el-button.is-disabled {
+  opacity: 0.5;
+}
+
+
+// -----------------------------------------------抽屉
+#app .el-drawer__wrapper .el-drawer__header span {
+  padding: 10px 0;
+  text-align: center;
+  background-color: @beside-color;
+  color: #fff;
+}
+
+#app .el-drawer__title {
+  box-shadow: 10px 10px 5px #888888;
+}
+
+/* 设置删除弹窗内的警告图标样式 */
+#app .iconjinggao1 {
+  font-size: 30px;
+  color: @primary-btn;
+}
+
+// ------------------------------------------------颜色选择器
+#app .el-color-picker__trigger {
+  border: none;
+}
+
+// ------------------------------------------------图标
+.iconfont.mini {
+  font-size: 12px; //小图标
+}
+
+// ---------------------------------------------------联级选择器
+.el-cascader__dropdown {
+  background: @table-th-bgc!important;
+}
+
+.el-cascader__dropdown .el-cascader-node.is-selectable.in-active-path {
+  background-color: #838992 !important;
+  color: #ccc;
+}
+
+.el-cascader-menu {
+  color: #ccc!important;
+}
+
+.el-cascader-node:not(.is-disabled):focus,
+.el-cascader-node:not(.is-disabled):hover {
+  // background: #f5f7fa;
+  background-color: #838992!important;
+}
+
+// 单选按钮颜色
+.el-cascader__dropdown .el-radio__input.is-checked .el-radio__inner {
+  border-color: skyblue;
+  background: skyblue;
+}
+
+.el-cascader__dropdown .el-cascader-node.in-active-path,
+.el-cascader__dropdown .el-cascader-node.is-active,
+.el-cascader__dropdown .el-cascader-node.is-selectable.in-checked-path {
+  color: skyblue;
+}
+
+// ---------------------------------------------------气泡确认框
+.el-popover {
+  background: rgb(77, 97, 137);
+  .el-popconfirm__main {
+    color: #fff;
+  }
+}
